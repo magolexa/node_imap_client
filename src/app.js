@@ -1,6 +1,5 @@
-import getSHA from './utils/SHA';
+import {getSHA} from './utils/SHA';
 import fs from 'fs';
-import config from '../config.json';
 import {Base64Decode} from 'base64-stream';
 import Imap from 'imap';
 import {toUpper} from './utils/utils';
@@ -11,7 +10,7 @@ import {findAttachmentParts} from './attachments/attachments';
 // Если есть непрочитанные письма в моменте запуска тоже их проверяет
 export function liveConnect() {
     // directory
-    const dir = config.downloads.directory;
+    const dir = './downloads';
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir);
     }

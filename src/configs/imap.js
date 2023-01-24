@@ -1,11 +1,11 @@
 import Imap from 'imap';
-import config from '../../config.json';
+import {ENV} from '.';
 
 export const imap = new Imap({
-    user: config.imap.user,
-    password: config.imap.password,
-    host: config.imap.host,
-    port: config.imap.port,
-    tls: config.imap.tls,
+    user: ENV.user,
+    password: ENV.password,
+    host: ENV.host,
+    port: 993,
+    tls: true,
     // debug: function(msg){console.log('imap:', msg);}
 });
