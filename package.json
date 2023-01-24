@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "base64-stream": "^1.0.0",
+    "crypto": "^1.0.1",
     "fs": "0.0.1-security",
     "imap": "^0.8.19",
     "prettier": "^2.8.3",

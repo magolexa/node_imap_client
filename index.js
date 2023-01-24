@@ -1,8 +1,10 @@
 const config = require('./config.json');
+const SHA = require('./SHA')
 const fs = require('fs');
 const Imap    = require('imap');
-const Base64Decode = require('base64-stream')
+const {Base64Decode} = require('base64-stream')
 const info = require('console');
+const getSHA = require('./SHA');
 
 var imap    = new Imap({
     "user": config.imap.user,
@@ -77,8 +79,9 @@ function removeUID(my_uid) {
 function liveConnect() {
 
   // directory
-  if (!fs.existsSync(config.downloads.directory)) {
-    fs.mkdirSync(config.downloads.directory);
+  const dir = config.downloads.directory
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir);
   }
 
   // imap
@@ -127,7 +130,10 @@ function liveConnect() {
                   const prefix = `(#${seqno})`
                   msg.on('body', (stream, info) => {
                     const writeStream = fs.createWriteStream(`${dir}/${filename}`);
-                    writeStream.on('finish', () => { console.log(`${prefix} Done writing to file ${filename}`) })
+                    writeStream.on('finish', () => {
+                      console.log(`${prefix} Done writing to file ${filename}`)
+                      console.log(`${prefix} SHA256 of ${filename} is: ${getSHA(dir + '/' + filename)}`)
+                    })
                     if (encoding === 'BASE64') stream.pipe(new Base64Decode()).pipe(writeStream)
                     else stream.pipe(writeStream)
                   })
