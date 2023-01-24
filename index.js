@@ -77,9 +77,8 @@ function removeUID(my_uid) {
 function liveConnect() {
 
   // directory
-  dir = "./downloads"
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir);
+  if (!fs.existsSync(config.downloads.directory)) {
+    fs.mkdirSync(config.downloads.directory);
   }
 
   // imap
