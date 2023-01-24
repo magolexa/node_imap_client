@@ -6,6 +6,6 @@ const {USER, PASSWORD, HOST} = process.env;
 
 export const ENV = {
     user: USER,
-    passwrod: PASSWORD,
+    password: PASSWORD,
     host: HOST,
 };

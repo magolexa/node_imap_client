@@ -1,5 +1,5 @@
 import Imap from 'imap';
-import {ENV} from '.';
+import {ENV} from './env';
 
 export const imap = new Imap({
     user: ENV.user,
