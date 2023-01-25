@@ -5,6 +5,7 @@ import Imap from 'imap';
 import {toUpper} from './utils/utils';
 import {imap} from './configs';
 import {findAttachmentParts} from './attachments/attachments';
+import {getMessageList, decodeStream} from './mails/message'
 
 // В режиме реального времени мониторит письма в почте, сохраняет вложения на латинице
 // Если есть непрочитанные письма в моменте запуска тоже их проверяет
@@ -19,21 +20,16 @@ export function liveConnect() {
     imap.once('error', console.error);
     imap.on('ready', () => {
         imap.openBox('INBOX', false, (error, box) => {
-            console.log(box.flags);
             if (error) throw error;
-
+            // console.log(box.flags);
             console.log('Connected!');
             imap.on('mail', () => {
                 imap.search(['UNSEEN'], (error, results) => {
                     if (error) throw error;
 
-                    const f = imap.fetch(results, {
-                        bodies: '',
-                        struct: true,
-                        markSeen: true,
-                    });
+                    const messageList = getMessageList(results, '', true, true)
 
-                    f.on('message', (msg, seqno) => {
+                    messageList.on('message', (msg, seqno) => {
                         console.log('New message #%d', seqno);
                         const prefix = `(#${seqno})`;
                         let header = null;
@@ -42,11 +38,16 @@ export function liveConnect() {
                             let buffer = '';
                             stream.on('data', (chunk) => {
                                 buffer += chunk.toString('utf8');
+                                console.log(buffer)
                             });
                             stream.once('end', () => {
                                 header = Imap.parseHeader(buffer);
+                                console.log(buffer)
                             });
+                            console.log(buffer)
+                            
                         });
+
                         msg.once('attributes', (attrs) => {
                             const attachments = findAttachmentParts(
                                 attrs.struct
@@ -67,10 +68,11 @@ export function liveConnect() {
 
                                 const encoding = toUpper(attachment.encoding);
                                 // A6 UID FETCH {attrs.uid} (UID FLAGS INTERNALDATE BODY.PEEK[{attachment.partID}])
-                                const f = imap.fetch(attrs.uid, {
+                                const messageList = imap.fetch(attrs.uid, {
                                     bodies: [attachment.partID],
                                 });
-                                f.on('message', (msg, seqno) => {
+
+                                messageList.on('message', (msg, seqno) => {
                                     const prefix = `(#${seqno})`;
                                     msg.on('body', (stream, info) => {
                                         const writeStream =
@@ -87,11 +89,7 @@ export function liveConnect() {
                                                 )}`
                                             );
                                         });
-                                        if (encoding === 'BASE64')
-                                            stream
-                                                .pipe(new Base64Decode())
-                                                .pipe(writeStream);
-                                        else stream.pipe(writeStream);
+                                        decodeStream(writeStream, encoding, stream)
                                     });
 
                                     msg.once('end', () => {
@@ -100,7 +98,7 @@ export function liveConnect() {
                                         );
                                     });
                                 });
-                                // f.once('end', () => { console.log('WS: downloder finish') })
+                                // messageList.once('end', () => { console.log('WS: downloder finish') })
                             });
                         });
                         msg.once('end', () => {
