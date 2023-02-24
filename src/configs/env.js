@@ -2,10 +2,12 @@ import * as dotenv from 'dotenv'; // see https://github.com/motdotla/dotenv#how-
 dotenv.config();
 
 // eslint-disable-next-line no-undef
-const {USER, PASSWORD, HOST} = process.env;
+const {MAILUSER, PASSWORD, HOST} = process.env;
 
 export const ENV = {
-    user: USER,
-    password: PASSWORD,
-    host: HOST,
+    user: MAILUSER,
+    password: MAILPASSWORD,
+    host: MAILHOST,
 };
+
+// console.log(ENV)
